@@ -1,10 +1,15 @@
-export function creatMarkup(photos){
-    const {
-        webformatURL, largeImageURL, tags, likes, views, comments, downloads
-    } = photos;
-    return 
-    `<div class="photo-card">
-    <a class="photo-card__link" href="${largeImageURL}"><img src="${webformatURL}" alt="${tags}" loading="lazy" /></a>
+export function creatMarkup(photos) {
+  const {
+    webformatURL,
+    largeImageURL,
+    tags,
+    likes,
+    views,
+    comments,
+    downloads,
+  } = photos;
+  return `<div class="photo-card">
+  <a class="photo-card__link" href="${largeImageURL}"><img class="photo-card__image" src="${webformatURL}" alt="${tags}" loading="lazy"/></a>
   <div class="info">
     <p class="info-item">
       <b>Likes</b>
@@ -23,5 +28,5 @@ export function creatMarkup(photos){
       ${downloads}
     </p>
   </div>
-</div>`
+</div>`;
 }

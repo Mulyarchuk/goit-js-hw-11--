@@ -1,88 +1,57 @@
-import SimpleLightbox from "simplelightbox";
-import "simplelightbox/dist/simple-lightbox.min.css";
+import './css/styles.css';
+import { creatMarkup } from './galleryCard';
+import axios from 'axios';
 import Notiflix from 'notiflix';
-
-import { creatMarkup } from "./galleryCard";
-const axios = require('axios').default;
+import SimpleLightbox from 'simplelightbox';
+import 'simplelightbox/dist/simple-lightbox.min.css';
 
 
 const form = document.querySelector(`#search-form`);
 const gallery = document.querySelector(`.gallery`);
-const btnLoad = document.querySelector(`.load-more`);
+const loadBtn = document.querySelector(`.load-more`)
+
+form.addEventListener(`submit`, onSubmit);
+
+let lightbox = new SimpleLightbox('.gallery a', {
+  captionsData: 'alt',
+  captionDelay: 250,
+});
+
+ let searchQuery = ``;
+ const BASE_URL = `https://pixabay.com/api/`
+ const KEY = `32776418-aa374a2a10c573564f087ae5a`;
+ const parameter = `?key=${KEY}&image_type=photo&orientation=horizontal&safesearch=true&per_page=40`;
+let page = 1;
+
+async function getPicture() {
+        try {
+          const response = await axios.get(
+            `${BASE_URL}${parameter}&q=${searchQuery}&page=${page}`
+          );
+          return response.data;
+        } catch (error) {
+          throw new Error(error);
+        }
+      }
+console.log(getPicture());
 
 
-
-
-
-form.addEventListener(`submit`,onSearch)
-// btnLoad.addEventListener(`click`,onLoadMore);
-
-var lightbox = new SimpleLightbox('.gallery a', 
-{captionsData: `alt`, 
-captionDelay: `250ms` });
-
-
-
-// let searchQuery = ``;
-// let page = 1;
-
-
-//  function onSearch(evt){
-//  evt.preventDefault();
-//  searchQuery = evt.currentTarget.elements.searchQuery.value;
-//  console.log(searchQuery);
-//  const BASE_URL = `https://pixabay.com/api/`
-//  const KEY = `32625337-c016256a0573a5e098b27062e`;
-//  async function getImage() {
-//     try {
-//   const response = await axios.get(`${BASE_URL}?
-//   key=${KEY}&
-//   q=${searchQuery}&
-//   image_type=photo&
-//   orientation=horisontal&
-//   safesearch=true&
-//   page=${page}&
-//   per_page=40`);
-//         return response.data;
-//     } catch (error) {
-//       console.error(error);
-//     }
-//   };
-
-// }try{
-//     const markup = hits.map(item => creatMarkup(item)).join('');
-//     gallery.innerHTML = markup;
-// }catch(error){
-
-// };
-
-//  function onLoadMore(){
-
-// }try{
-
-// }catch(error){
-
-//     }
-function onSearch(evt){
-    evt.prevent.default();
-    const searchQuery = evt.currentTarget.elements.searchQuery.value
-    .trim();
-    console.log(searchQuery);
-    const BASE_URL = 'https://pixabay.com/api/';
-const KEY =  '32625337-c016256a0573a5e098b27062e';
-const parameter = `?key=${KEY}&image_type=photo&orientation=horizontal&safesearch=true&per_page=40`;
-
-async function getPictures(searchQuery, page) {
-  try {
-    const response = await axios.get(
-      `${BASE_URL}${parameter}&q=${searchQuery}&page=${page}`
-    );
-    return response.data;
-  } catch (error) {
-    throw new Error(error);
-  }
+async function onSubmit(e){
+e.preventDefault();
+searchQuery = e.currentTarget.elements.searchQuery.value;
+console.log(searchQuery);
+gallery.innerHTML = ``;
+page = 1;
+try{
+    const searchData = await getPicture(searchQuery, page);
+    const { hits } = searchData;
+    const markup = hits.map(item => creatMarkup(item)).join('');
+    gallery.innerHTML = markup;
+    console.log(hits);
+    
 }
-getPictures()
-const markup = hits.map(item => creatMarkup(item)).join('');
-      gallery.innerHTML = markup;
+catch(error){
+console.log(error);
+}
+// fetch(`${BASE_URL}${parameter}&q=${searchQuery}`).then(resp=> resp.json()).then(console.log);
 }
