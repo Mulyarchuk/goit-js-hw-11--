@@ -11,6 +11,7 @@ const gallery = document.querySelector(`.gallery`);
 const loadBtn = document.querySelector(`.load-more`)
 
 form.addEventListener(`submit`, onSubmit);
+loadBtn.addEventListener(`click`, onLoadBtn)
 
 let lightbox = new SimpleLightbox('.gallery a', {
   captionsData: 'alt',
@@ -22,6 +23,7 @@ let lightbox = new SimpleLightbox('.gallery a', {
  const KEY = `32776418-aa374a2a10c573564f087ae5a`;
  const parameter = `?key=${KEY}&image_type=photo&orientation=horizontal&safesearch=true&per_page=40`;
 let page = 1;
+
 
 async function getPicture() {
         try {
@@ -42,16 +44,58 @@ searchQuery = e.currentTarget.elements.searchQuery.value;
 console.log(searchQuery);
 gallery.innerHTML = ``;
 page = 1;
+loadBtn.style.display = `none`;
+
+if (!searchQuery){
+  Notiflix.Notify.failure(`Please, enter your request`);
+  loadBtn.style.display = `none`;
+  return;
+}
 try{
     const searchData = await getPicture(searchQuery, page);
-    const { hits } = searchData;
+    const { hits, totalHits } = searchData;
+    if (hits.length > 0 && totalHits >0){
     const markup = hits.map(item => creatMarkup(item)).join('');
     gallery.innerHTML = markup;
-    console.log(hits);
+    Notiflix.Notify.success(`Hooray! We found ${totalHits} images.`);
+    lightbox.refresh();
+    loadBtn.style.display = `block`;
+  }
+    else if(totalHits===0){
+      Notiflix.Notify.failure(`Sorry, there are no images matching your search query. Please try again.`);
+      loadBtn.style.display = `none`;
+    }
+    
     
 }
 catch(error){
 console.log(error);
 }
 // fetch(`${BASE_URL}${parameter}&q=${searchQuery}`).then(resp=> resp.json()).then(console.log);
+}
+
+async function onLoadBtn(){
+  page+=1;
+
+  try{
+    const response = await getPicture(searchQuery, page);
+    const { hits, totalHits } = response;
+
+    const markup = hits.map(item => creatMarkup(item)).join('');
+    gallery.insertAdjacentHTML(`beforeend`, markup);
+
+    lightbox.refresh();
+    
+    const baseOfPages = totalHits / (40 * page);
+    console.log(baseOfPages);
+    
+    if (baseOfPages < 1) {
+      Notiflix.Notify.info("We're sorry, but you've reached the end of search results.");
+      loadBtn.style.display = `none`;
+    } else {
+      loadBtn.style.display = `block`;
+    }}
+  catch (error){
+    console.log(error);
+  }
 }
