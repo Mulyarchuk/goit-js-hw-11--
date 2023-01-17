@@ -8,10 +8,10 @@ import 'simplelightbox/dist/simple-lightbox.min.css';
 
 const form = document.querySelector(`#search-form`);
 const gallery = document.querySelector(`.gallery`);
-const loadBtn = document.querySelector(`.load-more`)
+const loadBtn = document.querySelector(`.load-more`);
 
 form.addEventListener(`submit`, onSubmit);
-loadBtn.addEventListener(`click`, onLoadBtn)
+loadBtn.addEventListener(`click`, onLoadBtn);
 
 let lightbox = new SimpleLightbox('.gallery a', {
   captionsData: 'alt',
@@ -48,25 +48,23 @@ loadBtn.style.display = `none`;
 
 if (!searchQuery){
   Notiflix.Notify.failure(`Please, enter your request`);
-  loadBtn.style.display = `none`;
   return;
 }
 try{
     const searchData = await getPicture(searchQuery, page);
     const { hits, totalHits } = searchData;
-    if (hits.length > 0 && totalHits >0){
+  if (hits.length > 0 ){
     const markup = hits.map(item => creatMarkup(item)).join('');
     gallery.innerHTML = markup;
     Notiflix.Notify.success(`Hooray! We found ${totalHits} images.`);
     lightbox.refresh();
+  }
+  else if(totalHits===0){
+    Notiflix.Notify.failure(`Sorry, there are no images matching your search query. Please try again.`);
+  }
+  if (totalHits > 40){
     loadBtn.style.display = `block`;
   }
-    else if(totalHits===0){
-      Notiflix.Notify.failure(`Sorry, there are no images matching your search query. Please try again.`);
-      loadBtn.style.display = `none`;
-    }
-    
-    
 }
 catch(error){
 console.log(error);
@@ -76,7 +74,7 @@ console.log(error);
 
 async function onLoadBtn(){
   page+=1;
-
+  loadBtn.style.display = "none";
   try{
     const response = await getPicture(searchQuery, page);
     const { hits, totalHits } = response;
@@ -89,9 +87,9 @@ async function onLoadBtn(){
     const baseOfPages = totalHits / (40 * page);
     console.log(baseOfPages);
     
-    if (baseOfPages < 1) {
+    if (baseOfPages <= 1) { 
+     console.log(baseOfPages);
       Notiflix.Notify.info("We're sorry, but you've reached the end of search results.");
-      loadBtn.style.display = `none`;
     } else {
       loadBtn.style.display = `block`;
     }}
